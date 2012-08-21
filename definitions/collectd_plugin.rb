@@ -30,7 +30,7 @@ define :collectd_plugin, :options => {}, :template => nil, :cookbook => nil do
       cookbook params[:cookbook]
     end
     variables :name=>params[:name], :options=>params[:options]
-    notifies :restart, resources(:service => "collectd")
+    notifies :restart, "service[#{node[:collectd][:service]}]"
   end
 end
 

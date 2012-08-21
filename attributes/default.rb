@@ -31,7 +31,7 @@ else
   default[:collectd][:plugin_dir] = "/usr/lib/collectd"
   default[:collectd][:types_db] = ["/usr/share/collectd/types.db"]
   default[:collectd][:package] = "collectd"
-  default[:collectd][:service] = "collectd"
+  default[:collectd][:service] = "collectd5"
 end
 
 
