@@ -93,7 +93,7 @@ else
       owner "root"
       group "root"
       mode "644"
-      notifies :restart, resources(:service => "collectd")
+      notifies :restart, "service[#{node[:collectd][:service]}]"
     end
   end
 end
