@@ -17,24 +17,26 @@
 # limitations under the License.
 #
 
+case node[:platform_family]
+when "rhel"
+  include_recipe "yum"
+    
+  yum_key "RPM-GPG-KEY-pakk" do
+    url "http://pakk.96b.it/RPM-GPG-KEY-pakk"
+    action :add
+  end
+
+  yum_repository "pakk" do
+    name "pakk"
+    description "pakk"
+    url "http://pakk.96b.it/repositories/el$releasever/$basearch/"
+    key "RPM-GPG-KEY-pakk"
+    action :add
+  end
+end
+
 package "collectd" do
-  package_name "collectd-core"
-end
-
-service "collectd" do
-  supports :restart => true, :status => true
-end
-
-directory "/etc/collectd" do
-  owner "root"
-  group "root"
-  mode "755"
-end
-
-directory "/etc/collectd/plugins" do
-  owner "root"
-  group "root"
-  mode "755"
+  package_name node[:collectd][:package]
 end
 
 directory node[:collectd][:base_dir] do
@@ -51,14 +53,11 @@ directory node[:collectd][:plugin_dir] do
   recursive true
 end
 
-%w(collectd collection thresholds).each do |file|
-  template "/etc/collectd/#{file}.conf" do
-    source "#{file}.conf.erb"
-    owner "root"
-    group "root"
-    mode "644"
-    notifies :restart, resources(:service => "collectd")
-  end
+directory "/etc/collectd/plugins" do
+  owner "root"
+  group "root"
+  mode "755"
+  recursive true
 end
 
 ruby_block "delete_old_plugins" do
@@ -84,6 +83,29 @@ ruby_block "delete_old_plugins" do
   end
 end
 
-service "collectd" do
+case node[:platform_family]
+when "rhel"
+  Chef::Log.info("RHEL system found, skipping non-RHEL collectd configs")
+else
+  %w(collection thresholds).each do |file|
+    template "/etc/collectd/#{file}.conf" do
+      source "#{file}.conf.erb"
+      owner "root"
+      group "root"
+      mode "644"
+      notifies :restart, resources(:service => "collectd")
+    end
+  end
+end
+
+template node[:collectd][:main_conf_file] do
+  source "collectd.conf.erb"
+  owner "root"
+  group "root"
+  mode 0644
+  notifies :restart, "service[#{node[:collectd][:service]}]"
+end
+
+service node[:collectd][:service] do
   action [:enable, :start]
 end

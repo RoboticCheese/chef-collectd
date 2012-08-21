@@ -17,9 +17,24 @@
 # limitations under the License.
 #
 
-default[:collectd][:base_dir] = "/var/lib/collectd"
-default[:collectd][:plugin_dir] = "/usr/lib/collectd"
-default[:collectd][:types_db] = ["/usr/share/collectd/types.db"]
+case node[:platform_family]
+when "rhel"
+  default[:collectd][:main_conf_file] = "/etc/collectd5.conf"
+  default[:collectd][:base_dir] = "/var/lib/collectd5"
+  default[:collectd][:plugin_dir] = "/usr/lib64/collectd5"
+  default[:collectd][:types_db] = ["/usr/share/collectd5/types.db"]
+  default[:collectd][:package] = "collectd5"
+  default[:collectd][:service] = "collectd5"
+else
+  default[:collectd][:main_conf_file] = "/etc/collectd/collectd.conf"
+  default[:collectd][:base_dir] = "/var/lib/collectd"
+  default[:collectd][:plugin_dir] = "/usr/lib/collectd"
+  default[:collectd][:types_db] = ["/usr/share/collectd/types.db"]
+  default[:collectd][:package] = "collectd"
+  default[:collectd][:service] = "collectd"
+end
+
+
 default[:collectd][:interval] = 10
 default[:collectd][:read_threads] = 5
 
