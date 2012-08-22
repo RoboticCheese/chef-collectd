@@ -83,18 +83,13 @@ ruby_block "delete_old_plugins" do
   end
 end
 
-case node[:platform_family]
-when "rhel"
-  Chef::Log.info("RHEL system found, skipping non-RHEL collectd configs")
-else
-  %w(collection thresholds).each do |file|
-    template "/etc/collectd/#{file}.conf" do
-      source "#{file}.conf.erb"
-      owner "root"
-      group "root"
-      mode "644"
-      notifies :restart, "service[#{node[:collectd][:service]}]"
-    end
+%w(collection thresholds).each do |file|
+  template "/etc/collectd/#{file}.conf" do
+    source "#{file}.conf.erb"
+    owner "root"
+    group "root"
+    mode "644"
+    notifies :restart, "service[#{node[:collectd][:service]}]"
   end
 end
 
